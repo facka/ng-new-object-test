@@ -54,6 +54,5 @@ Open the dev tool and go to Profiles. Then take a heap snapshot and see the resu
 See example: https://github.com/facka/ng-new-object-test/blob/master/memoryprofile.png
 
 #### Demo
-http://jsfiddle.net/87akyybu/
-
+http://jsfiddle.net/87akyybu/1/
 
