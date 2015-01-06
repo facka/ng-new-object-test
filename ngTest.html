@@ -7,14 +7,18 @@
 
     var points = {};
 
-    $scope.newproto = true;
-    $scope.new = true;
-    $scope.json = true;
+    $scope.showImprovedPoint = true;
+    $scope.showBadPoint = true;
+    $scope.showObjectPoints = true;
     $scope.count = 10000;
     $scope.functionsCount = 10;
     $scope.points = points;
 
-    Factory.functionsCount = $scope.functionsCount;
+    //Factory.functionsCount = $scope.functionsCount;
+
+    $scope.$watch('functionsCount', function(newVal) {
+      Factory.functionsCount = newVal;
+    });
 
     function _create(type) {
         if (points[type].items.length === 0) {
@@ -43,15 +47,15 @@
 
     function createObjects() {
 
-      if ($scope.new) {
+      if ($scope.showBadPoint) {
         create($scope.count, 'badPoints');
       }
 
-      if ($scope.newproto) {
-        create($scope.count, 'inprovedPoints');
+      if ($scope.showImprovedPoint) {
+        create($scope.count, 'improvedPoints');
       }
 
-      if ($scope.json) {
+      if ($scope.showObjectPoints) {
         create($scope.count, 'objectPoints');
       }
 
@@ -67,7 +71,7 @@
           start: 0,
           end: 0
         },
-        inprovedPoints: {
+        improvedPoints: {
           factory: ImprovedPointFactory,
           items: [],
           start: 0,
@@ -96,10 +100,10 @@
   }]);
 
  angular.module('testApp').factory('Factory', [function() {
-    var functions = 0;
+    var functionsCount = 0;
 
     return {
-      functions : functions
+      functionsCount : functionsCount
     };
   }]);
 
@@ -191,7 +195,7 @@
   <h3>Theese are 3 differents approachs:</h3>
 
   <div>
-    <p>- Using {} as constructor</p> <input type="checkbox" ng-model="json"/>
+    <p>- Using {} as constructor</p> <input type="checkbox" ng-model="showObjectPoints"/>
       <pre style="background-color: #999">
         <code>
           var instance = {
@@ -208,7 +212,7 @@
   </div>
 
   <div>
-    <p>- Construct an object with new and with methods attached to the instance.</p> <input type="checkbox" ng-model="new"/>
+    <p>- Construct an object with new and with methods attached to the instance.</p> <input type="checkbox" ng-model="showBadPoint"/>
       <pre style="background-color: #999">
       <code>
         var BadPoint = function(x,y) {
@@ -226,7 +230,7 @@
   </div>
 
   <div>
-    <p>- Construct an object with new and with methods attached to the prototype. (Best option, less memory consumption) </p> <input type="checkbox" ng-model="newproto"/>
+    <p>- Construct an object with new and with methods attached to the prototype. (Best option, less memory consumption) </p> <input type="checkbox" ng-model="showImprovedPoint"/>
     <pre style="background-color: #999">
       <code>
         var ImprovedPoint = function(x,y) {
