@@ -23,7 +23,7 @@ point.move = function(x,y) {
 
 #### Aproach 2: Construct an object with new and with methods attached to the instance.
 ```
- var Point2 = function(x,y) {
+ var BadPoint = function(x,y) {
   this.x= x;
   this.y= y;
 
@@ -37,12 +37,12 @@ point.move = function(x,y) {
 
 #### Aproach 3: Construct an object with new and with methods attached to the prototype. (Best option, less memory consumption)
 ```
- var Point = function(x,y) {
+ var ImprovedPoint = function(x,y) {
   this.x= x;
   this.y= y;
 };
 
-Point.prototype.move = function(x,y) {
+ImprovedPoint.prototype.move = function(x,y) {
   this.x += x;
   this.y += y;
 };
