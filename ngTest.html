@@ -1,0 +1,246 @@
+<HEAD>
+<TITLE>Perf Test</TITLE>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.7/angular.min.js"></script>
+<script>
+
+  angular.module('testApp', []).controller('TestController', ['$scope','$timeout','BadPointFactory','ImprovedPointFactory','ObjectPointFactory','Factory', function($scope, $timeout, BadPointFactory, ImprovedPointFactory, ObjectPointFactory, Factory) {
+
+    var points = {};
+
+    $scope.newproto = true;
+    $scope.new = true;
+    $scope.json = true;
+    $scope.count = 10000;
+    $scope.functionsCount = 10;
+    $scope.points = points;
+
+    Factory.functionsCount = $scope.functionsCount;
+
+    function _create(type) {
+        if (points[type].items.length === 0) {
+          console.time(type);
+          points[type].start = new Date().getTime();
+        }
+
+        var point = points[type].factory(0,0);
+        points[type].items.push(point);
+        points[type].end = new Date().getTime();
+
+        if (points[type].items.length === $scope.count) {
+          console.timeEnd(type);
+          points[type].end = new Date().getTime();
+        }
+    }
+
+    function create(count, type) {
+      var run = function() {
+        _create(type);
+      };
+      for (var i=0; i < count; i++) {
+        $timeout(run, 0);
+      }
+    }
+
+    function createObjects() {
+
+      if ($scope.new) {
+        create($scope.count, 'badPoints');
+      }
+
+      if ($scope.newproto) {
+        create($scope.count, 'inprovedPoints');
+      }
+
+      if ($scope.json) {
+        create($scope.count, 'objectPoints');
+      }
+
+      $scope.status = "DONE!";
+      $scope.buttonLabel = "TRY AGAIN";
+    }
+
+    function clean() {
+      points = {
+        badPoints: {
+          factory: BadPointFactory,
+          items: [],
+          start: 0,
+          end: 0
+        },
+        inprovedPoints: {
+          factory: ImprovedPointFactory,
+          items: [],
+          start: 0,
+          end: 0
+        },
+        objectPoints: {
+          factory: ObjectPointFactory,
+          items: [],
+          start: 0,
+          end: 0
+        }
+      };
+    }
+
+    $scope.restart = function() {
+      $scope.status = "Cleaning...";
+      $timeout(function() {
+        clean();
+        $scope.status = "Processing...";
+        $timeout(createObjects,0);
+      },0);
+    };
+
+    $scope.buttonLabel = "START";
+
+  }]);
+
+ angular.module('testApp').factory('Factory', [function() {
+    var functions = 0;
+
+    return {
+      functions : functions
+    };
+  }]);
+
+  angular.module('testApp').factory('ObjectPointFactory', ['Factory',function(Factory) {
+    var ObjectPoint = function(x,y) {
+      var instance = {
+        x: x,
+        y: y
+      };
+
+      for (var i = 0; i < Factory.functionsCount ; i++) {
+        instance['move'+i] = function(x,y) {
+          this.x += x;
+          this.y += y;
+        };
+      }
+
+      return instance;
+    };
+
+    return ObjectPoint;
+  }]);
+
+  angular.module('testApp').factory('BadPointFactory', ['Factory',function(Factory) {
+    var BadPoint = function(x,y) {
+      this.x= x;
+      this.y= y;
+
+      for (var i = 0; i < Factory.functionsCount ; i++) {
+        this['move'+i] = function(x,y) {
+          this.x += x;
+          this.y += y;
+        };
+      }
+
+    };
+
+    var BadPointFactory = function(x,y) {
+      return new BadPoint(x,y);
+    };
+
+    return BadPointFactory;
+  }]);
+
+  angular.module('testApp').factory('ImprovedPoint', ['Factory',function(Factory) {
+    var ImprovedPoint = function(x, y) {
+      this.x= x;
+      this.y= y;
+    };
+
+    for (var i = 0; i < Factory.functionsCount ; i++) {
+      ImprovedPoint.prototype['move'+i] = function(x,y) {
+        this.x += x;
+        this.y += y;
+      };
+    }
+
+    return ImprovedPoint;
+  }]);
+
+  angular.module('testApp').factory('ImprovedPointFactory', ['ImprovedPoint',function(ImprovedPoint) {
+
+    var ImprovedPointFactory = function(x,y) {
+      return new ImprovedPoint(x,y);
+    };
+
+    return ImprovedPointFactory;
+  }]);
+
+</script>
+</HEAD>
+<body ng-app="testApp">
+<div ng-controller="TestController">
+  TEST {{status}}
+
+  <div>
+    <button ng-click="restart()">{{buttonLabel}}</button>
+  </div>
+
+  <div> Number of object to create:
+    <input type="number" ng-model="count"/>
+  </div>
+  <div> Number of functions to create in each object:
+    <input type="number" ng-model="functionsCount"/>
+  </div>
+
+  <h2>This test creates objects of type Point. A point has a position (x,y) and a method to move it. For the purpose of this test, we can create many function to move (move0, move1, move2, ...)</h2>
+
+  <h3>Theese are 3 differents approachs:</h3>
+
+  <div>
+    <p>- Using {} as constructor</p> <input type="checkbox" ng-model="json"/>
+      <pre style="background-color: #999">
+        <code>
+          var instance = {
+              x: x,
+              y: y
+            };
+
+            instance.move = function(x,y) {
+              this.x += x;
+              this.y += y;
+            };
+        </code>
+      </pre>
+  </div>
+
+  <div>
+    <p>- Construct an object with new and with methods attached to the instance.</p> <input type="checkbox" ng-model="new"/>
+      <pre style="background-color: #999">
+      <code>
+        var BadPoint = function(x,y) {
+          this.x= x;
+          this.y= y;
+
+          this.move = function(x,y) {
+            this.x += x;
+            this.y += y;
+          };
+
+        };
+      </code>
+    </pre>
+  </div>
+
+  <div>
+    <p>- Construct an object with new and with methods attached to the prototype. (Best option, less memory consumption) </p> <input type="checkbox" ng-model="newproto"/>
+    <pre style="background-color: #999">
+      <code>
+        var ImprovedPoint = function(x,y) {
+          this.x= x;
+          this.y= y;
+        };
+
+        ImprovedPoint.prototype.move = function(x,y) {
+          this.x += x;
+          this.y += y;
+        };
+      </code>
+    </pre>
+  </div>
+
+</div>
+</body>
