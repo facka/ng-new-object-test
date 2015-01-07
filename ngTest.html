@@ -148,7 +148,7 @@
     return BadPointFactory;
   }]);
 
-  angular.module('testApp').factory('ImprovedPoint', ['Factory','Nameable','Set',function(Factory, Nameable, Set) {
+  angular.module('testApp').factory('ImprovedPoint', ['Factory','Nameable','Define',function(Factory, Nameable, Define) {
 
     var ImprovedPoint = function(x, y) {
       //Nameable.call(this, 'Point');
@@ -157,7 +157,7 @@
       this.y= y;
     };
 
-    ImprovedPoint.super = Set(ImprovedPoint).extends(Nameable);
+    ImprovedPoint.super = Define(ImprovedPoint).as(Nameable);
 
     return ImprovedPoint;
   }]);
@@ -193,11 +193,11 @@
     return Nameable;
   }]);
 
-  angular.module('testApp').factory('Set', [function() {
+  angular.module('testApp').factory('Define', [function() {
 
-    var Set = function(child) {
+    var Define = function(child) {
       return {
-        extends : function(parent) {
+        as : function(parent) {
           child.prototype = Object.create(parent.prototype);
           child.prototype.constructor = child;
           return function(/*this, arguments*/) {
@@ -209,7 +209,7 @@
       };
     };
 
-    return Set;
+    return Define;
   }]);
 
 </script>
