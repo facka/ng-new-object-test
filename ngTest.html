@@ -148,29 +148,68 @@
     return BadPointFactory;
   }]);
 
-  angular.module('testApp').factory('ImprovedPoint', ['Factory',function(Factory) {
+  angular.module('testApp').factory('ImprovedPoint', ['Factory','Nameable','Set',function(Factory, Nameable, Set) {
+
     var ImprovedPoint = function(x, y) {
+      //Nameable.call(this, 'Point');
+      ImprovedPoint.super(this, 'Point');
       this.x= x;
       this.y= y;
     };
 
-    for (var i = 0; i < Factory.functionsCount ; i++) {
-      ImprovedPoint.prototype['move'+i] = function(x,y) {
-        this.x += x;
-        this.y += y;
-      };
-    }
+    ImprovedPoint.super = Set(ImprovedPoint).extends(Nameable);
 
     return ImprovedPoint;
   }]);
 
-  angular.module('testApp').factory('ImprovedPointFactory', ['ImprovedPoint',function(ImprovedPoint) {
+  angular.module('testApp').factory('ImprovedPointFactory', ['ImprovedPoint', 'Factory',function(ImprovedPoint, Factory) {
 
     var ImprovedPointFactory = function(x,y) {
+      for (var i = 0; i < Factory.functionsCount ; i++) {
+        ImprovedPoint.prototype['move'+i] = function(x,y) {
+          this.x += x;
+          this.y += y;
+        };
+      }
       return new ImprovedPoint(x,y);
     };
 
     return ImprovedPointFactory;
+  }]);
+
+  angular.module('testApp').factory('Nameable', ['Factory',function(Factory) {
+    var Nameable = function(name) {
+      this.name =  name;
+    };
+
+    Nameable.prototype.getName = function() {
+      return this.name;
+    };
+
+    Nameable.prototype.setName = function(name) {
+      this.name = name;
+    };
+
+    return Nameable;
+  }]);
+
+  angular.module('testApp').factory('Set', [function() {
+
+    var Set = function(child) {
+      return {
+        extends : function(parent) {
+          child.prototype = Object.create(parent.prototype);
+          child.prototype.constructor = child;
+          return function(/*this, arguments*/) {
+            var args = Array.prototype.slice.call(arguments);
+            var self = args.shift();
+            parent.apply(self, args);
+          };
+        }
+      };
+    };
+
+    return Set;
   }]);
 
 </script>
