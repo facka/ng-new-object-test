@@ -51,7 +51,8 @@ ImprovedPoint.prototype.move = function(x,y) {
 #### See results
 Open the dev tool and go to Profiles. Then take a heap snapshot and see the results. If you read the link that I told you at the beggining you will know what I am talking about.
 
-#### Demo
-http://jsfiddle.net/87akyybu/
+See example: https://github.com/facka/ng-new-object-test/blob/master/memoryprofile.png
 
+#### Demo
+http://jsfiddle.net/87akyybu/1/
 
